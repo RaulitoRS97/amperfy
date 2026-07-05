@@ -256,6 +256,10 @@ public class BasicFetchedResultsController<ResultType>: NSObject
     fetchResultsController.fetchedObjects as? [ResultType]
   }
 
+  public var fetchedObjectsCount: Int {
+    fetchResultsController.sections?.reduce(0) { $0 + $1.numberOfObjects } ?? 0
+  }
+
   public var sections: [NSFetchedResultsSectionInfo]? {
     fetchResultsController.sections
   }
@@ -501,15 +505,19 @@ public class CachedFetchedResultsController<ResultType>: BasicFetchedResultsCont
     self.sectionIndexType = sectionIndexType
     let sectionNameKeyPath: String? = isGroupedInAlphabeticSections ? fetchRequest
       .sortDescriptors![0].key : nil
+    let allFetchRequest = fetchRequest.copy() as! NSFetchRequest<ResultType>
+    allFetchRequest.fetchBatchSize = 200
     self.allFetchResulsController = CustomSectionIndexFetchedResultsController<ResultType>(
-      fetchRequest: fetchRequest.copy() as! NSFetchRequest<ResultType>,
+      fetchRequest: allFetchRequest,
       coreDataCompanion: coreDataCompanion,
       sectionNameKeyPath: sectionNameKeyPath,
       cacheName: "\(Self.typeName)-\(account.serverHash)-\(account.userHash)"
     )
     allFetchResulsController.sectionIndexType = sectionIndexType
+    let searchFetchRequest = fetchRequest.copy() as! NSFetchRequest<ResultType>
+    searchFetchRequest.fetchBatchSize = 200
     self.searchFetchResulsController = CustomSectionIndexFetchedResultsController<ResultType>(
-      fetchRequest: fetchRequest.copy() as! NSFetchRequest<ResultType>,
+      fetchRequest: searchFetchRequest,
       coreDataCompanion: coreDataCompanion,
       sectionNameKeyPath: sectionNameKeyPath,
       cacheName: nil
@@ -548,7 +556,6 @@ public class CachedFetchedResultsController<ResultType>: BasicFetchedResultsCont
     lastSearchPredicateFormat = nil
     if !wasSearchActive,
        didFetchAll,
-       keepAllResultsUpdated,
        allFetchResulsController.fetchedObjects != nil {
       return
     }
