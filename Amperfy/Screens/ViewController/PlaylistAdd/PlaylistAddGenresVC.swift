@@ -42,6 +42,9 @@ class PlaylistAddGenresVC: SingleFetchedResultsTableViewController<GenreMO>, Pla
   override func viewDidLoad() {
     super.viewDidLoad()
 
+    isInitialSearchUpdatePending = appDelegate.storage.main.library
+      .getGenreCount(for: account) > Self.deferredInitialUpdateThreshold
+
     doneButton = addToPlaylistManager.createDoneButton()
     navigationItem.rightBarButtonItems = [doneButton]
 

@@ -38,6 +38,8 @@ class MusicFoldersVC: SingleFetchedResultsTableViewController<MusicFolderMO> {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    isInitialSearchUpdatePending = appDelegate.storage.main.library
+      .getMusicFolderCount(for: account) > Self.deferredInitialUpdateThreshold
     appDelegate.userStatistics.visited(.musicFolders)
 
     fetchedResultsController = MusicFolderFetchedResultsController(

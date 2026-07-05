@@ -43,6 +43,9 @@ class PlaylistAddMusicFoldersVC: SingleFetchedResultsTableViewController<MusicFo
   override func viewDidLoad() {
     super.viewDidLoad()
 
+    isInitialSearchUpdatePending = appDelegate.storage.main.library
+      .getMusicFolderCount(for: account) > Self.deferredInitialUpdateThreshold
+
     doneButton = addToPlaylistManager.createDoneButton()
     navigationItem.rightBarButtonItems = [doneButton]
 

@@ -70,6 +70,9 @@ class PlaylistAddAlbumsVC: SingleSnapshotFetchedResultsTableViewController<Album
   override func viewDidLoad() {
     super.viewDidLoad()
 
+    isInitialSearchUpdatePending = displayFilter == .all && appDelegate.storage.main.library
+      .getAlbumCount(for: account) > Self.deferredInitialUpdateThreshold
+
     doneButton = addToPlaylistManager.createDoneButton()
     navigationItem.rightBarButtonItems = [doneButton]
 

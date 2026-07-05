@@ -39,6 +39,9 @@ class GenresVC: SingleFetchedResultsTableViewController<GenreMO> {
   override func viewDidLoad() {
     super.viewDidLoad()
 
+    isInitialSearchUpdatePending = appDelegate.storage.main.library
+      .getGenreCount(for: account) > Self.deferredInitialUpdateThreshold
+
     #if !targetEnvironment(macCatalyst)
       refreshControl = UIRefreshControl()
     #endif

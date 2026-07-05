@@ -95,6 +95,9 @@ class PlaylistAddPlaylistsVC: SingleSnapshotFetchedResultsTableViewController<Pl
   override func viewDidLoad() {
     super.viewDidLoad()
 
+    isInitialSearchUpdatePending = appDelegate.storage.main.library
+      .getPlaylistCount(for: account) > Self.deferredInitialUpdateThreshold
+
     doneButton = addToPlaylistManager.createDoneButton()
     navigationItem.rightBarButtonItems = [doneButton]
 

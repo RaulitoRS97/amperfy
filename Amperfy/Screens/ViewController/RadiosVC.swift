@@ -42,6 +42,9 @@ class RadiosVC: SingleFetchedResultsTableViewController<RadioMO> {
   override func viewDidLoad() {
     super.viewDidLoad()
 
+    isInitialSearchUpdatePending = appDelegate.storage.main.library
+      .getRadioCount(for: account) > Self.deferredInitialUpdateThreshold
+
     #if !targetEnvironment(macCatalyst)
       refreshControl = UIRefreshControl()
     #endif

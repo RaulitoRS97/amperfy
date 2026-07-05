@@ -116,6 +116,8 @@ class PlaylistsVC: SingleSnapshotFetchedResultsTableViewController<PlaylistMO> {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    isInitialSearchUpdatePending = appDelegate.storage.main.library
+      .getPlaylistCount(for: account) > Self.deferredInitialUpdateThreshold
     appDelegate.userStatistics.visited(.playlists)
 
     optionsButton = UIBarButtonItem.createSortBarButton()

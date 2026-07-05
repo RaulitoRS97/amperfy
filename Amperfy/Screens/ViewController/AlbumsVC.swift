@@ -161,6 +161,9 @@ class AlbumsVC: SingleSnapshotFetchedResultsTableViewController<AlbumMO> {
   override func viewDidLoad() {
     super.viewDidLoad()
 
+    isInitialSearchUpdatePending = displayFilter == .all && appDelegate.storage.main.library
+      .getAlbumCount(for: account) > Self.deferredInitialUpdateThreshold
+
     #if !targetEnvironment(macCatalyst)
       refreshControl = UIRefreshControl()
     #endif

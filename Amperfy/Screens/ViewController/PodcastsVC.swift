@@ -41,6 +41,8 @@ class PodcastsVC: MultiSourceTableViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    isInitialSearchUpdatePending = appDelegate.storage.main.library
+      .getPodcastCount(for: account) > Self.deferredInitialUpdateThreshold
     appDelegate.userStatistics.visited(.podcasts)
 
     optionsButton = UIBarButtonItem.createSortBarButton()

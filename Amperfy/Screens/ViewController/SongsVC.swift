@@ -51,6 +51,9 @@ class SongsVC: SingleFetchedResultsTableViewController<SongMO> {
   override func viewDidLoad() {
     super.viewDidLoad()
 
+    isInitialSearchUpdatePending = displayFilter == .all && appDelegate.storage.main.library
+      .getSongCount(for: account) > Self.deferredInitialUpdateThreshold
+
     #if !targetEnvironment(macCatalyst)
       refreshControl = UIRefreshControl()
     #endif

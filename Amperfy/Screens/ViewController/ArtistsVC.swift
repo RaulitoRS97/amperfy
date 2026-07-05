@@ -154,6 +154,8 @@ class ArtistsVC: SingleSnapshotFetchedResultsTableViewController<ArtistMO> {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    isInitialSearchUpdatePending = displayFilter == .all && appDelegate.storage.main.library
+      .getArtistCount(for: account) > Self.deferredInitialUpdateThreshold
     appDelegate.userStatistics.visited(.artists)
 
     optionsButton = UIBarButtonItem.createOptionsBarButton()
