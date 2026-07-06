@@ -146,6 +146,7 @@ class BasicTableViewController: KeyCommandTableViewController {
     super.viewDidAppear(animated)
     guard isInitialSearchUpdatePending else { return }
     isInitialSearchUpdatePending = false
+    contentUnavailableConfiguration = nil
     updateSearchResults(for: searchController)
   }
 

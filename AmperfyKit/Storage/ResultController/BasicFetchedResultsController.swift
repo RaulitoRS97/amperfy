@@ -505,19 +505,15 @@ public class CachedFetchedResultsController<ResultType>: BasicFetchedResultsCont
     self.sectionIndexType = sectionIndexType
     let sectionNameKeyPath: String? = isGroupedInAlphabeticSections ? fetchRequest
       .sortDescriptors![0].key : nil
-    let allFetchRequest = fetchRequest.copy() as! NSFetchRequest<ResultType>
-    allFetchRequest.fetchBatchSize = 200
     self.allFetchResulsController = CustomSectionIndexFetchedResultsController<ResultType>(
-      fetchRequest: allFetchRequest,
+      fetchRequest: fetchRequest.copy() as! NSFetchRequest<ResultType>,
       coreDataCompanion: coreDataCompanion,
       sectionNameKeyPath: sectionNameKeyPath,
       cacheName: "\(Self.typeName)-\(account.serverHash)-\(account.userHash)"
     )
     allFetchResulsController.sectionIndexType = sectionIndexType
-    let searchFetchRequest = fetchRequest.copy() as! NSFetchRequest<ResultType>
-    searchFetchRequest.fetchBatchSize = 200
     self.searchFetchResulsController = CustomSectionIndexFetchedResultsController<ResultType>(
-      fetchRequest: searchFetchRequest,
+      fetchRequest: fetchRequest.copy() as! NSFetchRequest<ResultType>,
       coreDataCompanion: coreDataCompanion,
       sectionNameKeyPath: sectionNameKeyPath,
       cacheName: nil
@@ -529,6 +525,37 @@ public class CachedFetchedResultsController<ResultType>: BasicFetchedResultsCont
       isGroupedInAlphabeticSections: isGroupedInAlphabeticSections
     )
     fetchResultsController = allFetchResulsController
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(contextObjectsDidChange(_:)),
+      name: .NSManagedObjectContextObjectsDidChange,
+      object: coreDataCompanion.context
+    )
+  }
+
+  deinit {
+    NotificationCenter.default.removeObserver(self)
+  }
+
+  private var isAllFetchStale = false
+
+  @objc
+  private func contextObjectsDidChange(_ notification: Notification) {
+    guard !isAllFetchStale,
+          let entityName = allFetchResulsController.fetchRequest.entityName,
+          let userInfo = notification.userInfo else { return }
+    for key in [
+      NSInsertedObjectsKey,
+      NSUpdatedObjectsKey,
+      NSDeletedObjectsKey,
+      NSRefreshedObjectsKey,
+    ] {
+      guard let objects = userInfo[key] as? Set<NSManagedObject> else { continue }
+      if objects.contains(where: { $0.entity.name == entityName }) {
+        isAllFetchStale = true
+        return
+      }
+    }
   }
 
   override public func search(predicate: NSPredicate?) {
@@ -556,10 +583,12 @@ public class CachedFetchedResultsController<ResultType>: BasicFetchedResultsCont
     lastSearchPredicateFormat = nil
     if !wasSearchActive,
        didFetchAll,
+       keepAllResultsUpdated || !isAllFetchStale,
        allFetchResulsController.fetchedObjects != nil {
       return
     }
     didFetchAll = true
+    isAllFetchStale = false
     allFetchResulsController.fetch()
   }
 
